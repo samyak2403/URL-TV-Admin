@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="edittext_border">#CCCCCC</color>
+    <color name="edittext_background">#FFFFFF</color>
+    <color name="text_color">#212121</color>
+    <color name="hint_color">#212121</color>
+    <color name="primary">#1976D2</color>
+    <color name="button_text_color">#FFFFFF</color>
+    <color name="yellow">#FFC107</color>
+    <color name="Red">#F8144F</color>
+    <color name="textColor">#616161</color>
+    <color name="colorNormalBg">#ffffffff</color>
+
+    <color name="transparent">@android:color/transparent</color>
+
+    <color name="category_icon_color">#757575</color>
+    <color name="category_text_color">#616161</color>
+    <color name="action_icon_color">@color/Red</color>
+    <color name="delete_icon_color">#F44336</color>
+    <color name="ripple_color">#1F000000</color>
+
+</resources>
