@@ -14,6 +14,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.android.material.imageview.ShapeableImageView
 import android.widget.ImageButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class ChannelAdapter(
     private var channelList: MutableList<Channel>,
@@ -77,14 +78,28 @@ class ChannelAdapter(
     }
 
     private fun deleteChannel(channel: Channel) {
+        // Show confirmation dialog
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.delete_channel)
+            .setMessage(R.string.delete_channel_confirmation)
+            .setPositiveButton(R.string.delete) { dialog, _ ->
+                performDelete(channel)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun performDelete(channel: Channel) {
         channel.id?.let { channelId ->
             databaseReference.child(channelId).removeValue()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(context, "Channel deleted", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Failed to delete channel", Toast.LENGTH_SHORT).show()
-                    }
+                .addOnSuccessListener {
+                    Toast.makeText(context, R.string.success_channel_deleted, Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(context, R.string.error_deleting_channel, Toast.LENGTH_SHORT).show()
                 }
         }
     }
