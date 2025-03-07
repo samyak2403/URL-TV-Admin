@@ -29,6 +29,17 @@ class AddChannleActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = getString(R.string.add_channel)
         }
+        
+        // Set arrow color to white using DrawableCompat
+        binding.toolbar.navigationIcon?.let { drawable ->
+            drawable.setTint(getColor(android.R.color.white))
+        }
+        
+        // Set title color to white
+        binding.toolbar.setTitleTextColor(getColor(android.R.color.white))
+        
+        // Set status bar color to red
+        window.statusBarColor = getColor(R.color.Red)
     }
 
     private fun setupCategoryDropdown() {

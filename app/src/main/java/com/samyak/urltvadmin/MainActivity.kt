@@ -1,21 +1,31 @@
 package com.samyak.urltvadmin
 
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Observer
 import com.samyak.urltvadmin.databinding.ActivityMainBinding
 import com.samyak.urltvadmin.utils.CategoryManager
+import com.samyak.urltvadmin.utils.DrawableUtils
+import com.samyak.urltvadmin.utils.NetworkManager
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var networkManager: NetworkManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,12 +40,18 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         
+        // Initialize network manager
+        networkManager = NetworkManager(this)
+        setupNetworkMonitoring()
+        
         // Apply staggered animations to UI elements
         animateUIElements()
         
         // Set touch listeners for hover effects
         setupCardTouchEffects(binding.adminCard)
         setupCardTouchEffects(binding.categoryCard)
+        setupCardTouchEffects(binding.networkCard)
+        setupCardTouchEffects(binding.aboutCard)
         
         // Set click listeners for cards with improved handling
         binding.adminCard.setOnClickListener {
@@ -49,8 +65,143 @@ class MainActivity : AppCompatActivity() {
             animateAndNavigate(binding.categoryCard, AddCategoryActivity::class.java)
         }
         
+        binding.networkCard.setOnClickListener {
+            // Show checking state
+            binding.networkStatusText.text = "Checking..."
+            binding.networkProgressIndicator.visibility = View.VISIBLE
+            binding.networkIcon.alpha = 0.5f
+            binding.networkIcon.clearAnimation()
+            
+            // Use good.png for all statuses
+            binding.networkIcon.setImageResource(R.drawable.good)
+            binding.networkIcon.clearColorFilter()
+            
+            // Force a network check when clicked
+            networkManager.checkInitialConnectionStatus()
+            
+            // Add a small vibration feedback if available
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            }
+        }
+        
+        binding.aboutCard.setOnClickListener {
+            // Navigate to AboutActivity with animation
+            animateAndNavigate(binding.aboutCard, AboutActivity::class.java)
+        }
+        
         // Initialize CategoryManager with Firebase data
         CategoryManager.loadCategoriesFromFirebase {}
+    }
+    
+    private fun setupNetworkMonitoring() {
+        // Set initial UI state
+        binding.networkStatusText.text = "Checking..."
+        
+        // Use good.png for all network statuses
+        binding.networkIcon.setImageResource(R.drawable.good)
+        binding.networkIcon.clearColorFilter()
+        
+        // Show progress indicator while checking
+        binding.networkProgressIndicator.visibility = View.VISIBLE
+        binding.networkIcon.alpha = 0.5f
+        
+        // Observe network status changes
+        networkManager.connectionStatus.observe(this, Observer { status ->
+            updateNetworkUI(status)
+        })
+        
+        // Perform initial check
+        networkManager.checkInitialConnectionStatus()
+    }
+    
+    private fun updateNetworkUI(status: NetworkManager.ConnectionStatus?) {
+        binding.networkIcon.clearAnimation()
+        
+        // Prepare status change animation
+        val statusChangeAnim = AnimationUtils.loadAnimation(this, R.anim.network_status_change)
+        
+        when (status) {
+            NetworkManager.ConnectionStatus.CONNECTED_EXCELLENT -> {
+                // Hide progress indicator
+                binding.networkProgressIndicator.visibility = View.GONE
+                binding.networkIcon.alpha = 1.0f
+                
+                // Update text and use good.png for all statuses
+                binding.networkStatusText.text = "Excellent"
+                binding.networkIcon.setImageResource(R.drawable.excellent)
+                binding.networkIcon.clearColorFilter()
+                
+                // Apply animation
+                binding.networkIcon.startAnimation(statusChangeAnim)
+            }
+            NetworkManager.ConnectionStatus.CONNECTED_GOOD -> {
+                // Hide progress indicator
+                binding.networkProgressIndicator.visibility = View.GONE
+                binding.networkIcon.alpha = 1.0f
+                
+                // Update text and use good.png for all statuses
+                binding.networkStatusText.text = "Good"
+                binding.networkIcon.setImageResource(R.drawable.good)
+                binding.networkIcon.clearColorFilter()
+                
+                // Apply animation
+                binding.networkIcon.startAnimation(statusChangeAnim)
+            }
+            NetworkManager.ConnectionStatus.CONNECTED_POOR -> {
+                // Hide progress indicator
+                binding.networkProgressIndicator.visibility = View.GONE
+                binding.networkIcon.alpha = 1.0f
+                
+                // Update text and use good.png for all statuses
+                binding.networkStatusText.text = "Poor"
+                binding.networkIcon.setImageResource(R.drawable.poor)
+                binding.networkIcon.clearColorFilter()
+                
+                // Apply animation
+                binding.networkIcon.startAnimation(statusChangeAnim)
+            }
+            NetworkManager.ConnectionStatus.DISCONNECTED -> {
+                // Hide progress indicator
+                binding.networkProgressIndicator.visibility = View.GONE
+                binding.networkIcon.alpha = 1.0f
+                
+                // Update text and use good.png for all statuses
+                binding.networkStatusText.text = "Disconnected"
+                binding.networkIcon.setImageResource(R.drawable.disconnected)
+                binding.networkIcon.clearColorFilter()
+                
+                // Apply animation
+                binding.networkIcon.startAnimation(statusChangeAnim)
+                
+                // Add a subtle pulse animation for disconnected state
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val pulseAnim = AnimationUtils.loadAnimation(this, R.anim.network_pulse)
+                    binding.networkIcon.startAnimation(pulseAnim)
+                }, 500)
+            }
+            NetworkManager.ConnectionStatus.CHECKING -> {
+                // Show progress indicator
+                binding.networkProgressIndicator.visibility = View.VISIBLE
+                binding.networkIcon.alpha = 0.5f
+                
+                // Update text and use good.png for all statuses
+                binding.networkStatusText.text = "Checking..."
+                binding.networkIcon.setImageResource(R.drawable.good)
+                binding.networkIcon.clearColorFilter()
+            }
+            else -> {
+                // Hide progress indicator
+                binding.networkProgressIndicator.visibility = View.GONE
+                binding.networkIcon.alpha = 1.0f
+                
+                // Update text and use good.png for all statuses
+                binding.networkStatusText.text = "Unknown"
+                binding.networkIcon.setImageResource(R.drawable.unknown)
+                binding.networkIcon.clearColorFilter()
+            }
+        }
     }
     
     private fun setupCardTouchEffects(card: View) {
@@ -95,18 +246,36 @@ class MainActivity : AppCompatActivity() {
         // Animate cards with staggered timing
         binding.adminCard.visibility = View.INVISIBLE
         binding.categoryCard.visibility = View.INVISIBLE
+        binding.networkCard.visibility = View.INVISIBLE
+        binding.aboutCard.visibility = View.INVISIBLE
         
+        // First row animation
         Handler(Looper.getMainLooper()).postDelayed({
+            // Animate admin card
             binding.adminCard.visibility = View.VISIBLE
             val adminCardAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_and_scale)
             binding.adminCard.startAnimation(adminCardAnim)
             
-            // Animate category card with a slight delay for staggered effect
+            // Animate category card with a slight delay
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.categoryCard.visibility = View.VISIBLE
                 val categoryCardAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_and_scale)
                 binding.categoryCard.startAnimation(categoryCardAnim)
             }, 150)
+            
+            // Second row animation with more delay
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.networkCard.visibility = View.VISIBLE
+                val networkCardAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_and_scale)
+                binding.networkCard.startAnimation(networkCardAnim)
+                
+                // Animate about card with a slight delay after network card
+                Handler(Looper.getMainLooper()).postDelayed({
+                    binding.aboutCard.visibility = View.VISIBLE
+                    val aboutCardAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_and_scale)
+                    binding.aboutCard.startAnimation(aboutCardAnim)
+                }, 150)
+            }, 300)
         }, 600)
     }
     
@@ -131,5 +300,34 @@ class MainActivity : AppCompatActivity() {
             // Re-enable the view (though the activity will be finishing)
             view.isEnabled = true
         }, 200)
+    }
+    
+    private fun showAboutDialog() {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("About URL TV Admin")
+            .setMessage("""
+                Version: 1.0
+                
+                URL TV Admin is a powerful tool for managing your IPTV content. This admin panel allows you to:
+                
+                • Manage channel categories
+                • Add and edit channels
+                • Monitor network connectivity
+                • Configure app settings
+                
+                © 2023 URL TV Admin. All rights reserved.
+                
+                For support: support@urltvadmin.com
+            """.trimIndent())
+            .setPositiveButton("OK", null)
+            .create()
+        
+        dialog.show()
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up network callback
+        networkManager.unregisterNetworkCallback()
     }
 }
