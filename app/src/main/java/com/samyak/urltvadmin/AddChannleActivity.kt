@@ -1,50 +1,29 @@
 package com.samyak.urltvadmin
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import android.widget.AutoCompleteTextView
-import android.widget.ArrayAdapter
+import com.samyak.urltvadmin.databinding.ActivityAddChannleBinding
 import com.samyak.urltvadmin.utils.CategoryManager
 import com.samyak.urltvadmin.utils.ValidationUtils
 import com.samyak.urltvadmin.repository.ChannelRepository
 
 class AddChannleActivity : AppCompatActivity() {
-    private lateinit var editTextChannelName: TextInputEditText
-    private lateinit var editTextChannelLink: TextInputEditText
-    private lateinit var editTextChannelLogo: TextInputEditText
-    private lateinit var channelCategory: AutoCompleteTextView
-    private lateinit var buttonAddChannel: MaterialButton
-    private lateinit var toolbar: Toolbar
+    private lateinit var binding: ActivityAddChannleBinding
     private val channelRepository = ChannelRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_channle)
+        binding = ActivityAddChannleBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        initializeViews()
         setupToolbar()
         setupCategoryDropdown()
         setupClickListeners()
     }
 
-    private fun initializeViews() {
-        editTextChannelName = findViewById(R.id.editTextChannelName)
-        editTextChannelLink = findViewById(R.id.editTextChannelLink)
-        editTextChannelLogo = findViewById(R.id.channle_logo)
-        channelCategory = findViewById(R.id.channelCategory)
-        buttonAddChannel = findViewById(R.id.buttonAddChannel)
-        toolbar = findViewById(R.id.toolbar)
-    }
-
     private fun setupToolbar() {
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
@@ -54,33 +33,36 @@ class AddChannleActivity : AppCompatActivity() {
 
     private fun setupCategoryDropdown() {
         val adapter = CategoryManager.getCategoryAdapter(this)
-        channelCategory.setAdapter(adapter)
+        binding.channelCategory.setAdapter(adapter)
         
         // Set default category if needed
-        channelCategory.setText(CategoryManager.categories.first(), false)
+        binding.channelCategory.setText(CategoryManager.categories.first(), false)
     }
 
     private fun setupClickListeners() {
-        buttonAddChannel.setOnClickListener { addChannel() }
+        binding.buttonAddChannel.setOnClickListener { addChannel() }
     }
 
     private fun addChannel() {
         if (!validateInputs()) return
 
         val channel = Channel(
-            name = editTextChannelName.text.toString().trim(),
-            link = editTextChannelLink.text.toString().trim(),
-            logo = editTextChannelLogo.text.toString().trim(),
-            category = channelCategory.text.toString().trim()
+            name = binding.editTextChannelName.text.toString().trim(),
+            link = binding.editTextChannelLink.text.toString().trim(),
+            logo = binding.channleLogo.text.toString().trim(),
+            category = binding.channelCategory.text.toString().trim()
         )
 
+        showLoading(true)
         channelRepository.addChannel(channel)
             .addOnSuccessListener {
+                showLoading(false)
                 Toast.makeText(this, R.string.channel_added_successfully, Toast.LENGTH_SHORT).show()
                 clearFields()
                 finish()
             }
             .addOnFailureListener {
+                showLoading(false)
                 Toast.makeText(this, R.string.failed_to_add_channel, Toast.LENGTH_SHORT).show()
             }
     }
@@ -88,12 +70,12 @@ class AddChannleActivity : AppCompatActivity() {
     private fun validateInputs(): Boolean {
         var isValid = true
 
-        if (editTextChannelName.text.toString().trim().isEmpty()) {
-            editTextChannelName.error = getString(R.string.channel_name_required)
+        if (binding.editTextChannelName.text.toString().trim().isEmpty()) {
+            binding.editTextChannelName.error = getString(R.string.channel_name_required)
             isValid = false
         }
 
-        if (!ValidationUtils.validateUrl(editTextChannelLink, getString(R.string.channel_link_required))) {
+        if (!ValidationUtils.validateUrl(binding.editTextChannelLink, getString(R.string.channel_link_required))) {
             isValid = false
         }
 
@@ -101,15 +83,15 @@ class AddChannleActivity : AppCompatActivity() {
     }
 
     private fun showLoading(show: Boolean) {
-        buttonAddChannel.isEnabled = !show
+        binding.buttonAddChannel.isEnabled = !show
         // Add loading indicator if needed
     }
 
     private fun clearFields() {
-        editTextChannelName.setText("")
-        editTextChannelLink.setText("")
-        editTextChannelLogo.setText("")
-        channelCategory.setText("")
+        binding.editTextChannelName.setText("")
+        binding.editTextChannelLink.setText("")
+        binding.channleLogo.setText("")
+        binding.channelCategory.setText("")
     }
 
     override fun onSupportNavigateUp(): Boolean {

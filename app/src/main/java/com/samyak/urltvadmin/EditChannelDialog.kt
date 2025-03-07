@@ -4,15 +4,12 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
-import android.widget.AutoCompleteTextView
 import android.widget.ArrayAdapter
+import com.samyak.urltvadmin.databinding.DialogEditChannelBinding
 import com.samyak.urltvadmin.utils.CategoryManager
+import com.samyak.urltvadmin.utils.ValidationUtils
 
 class EditChannelDialog(
     context: Context,
@@ -20,55 +17,39 @@ class EditChannelDialog(
     private val listener: ChannelUpdateListener
 ) : Dialog(context) {
 
-    private lateinit var editTextChannelName: TextInputEditText
-    private lateinit var editTextChannelLink: TextInputEditText
-    private lateinit var editTextChannelLogo: TextInputEditText
-    private lateinit var editTextChannelCategory: AutoCompleteTextView
-    private lateinit var buttonUpdate: MaterialButton
-    private lateinit var buttonCancel: MaterialButton
+    private val binding: DialogEditChannelBinding = DialogEditChannelBinding.inflate(LayoutInflater.from(context))
 
     init {
-        setContentView(R.layout.dialog_edit_channel)
+        setContentView(binding.root)
         window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        initializeViews()
         setupCategoryDropdown()
         setupClickListeners()
         populateData()
     }
 
-    private fun initializeViews() {
-        editTextChannelName = findViewById(R.id.editTextChannelName)
-        editTextChannelLink = findViewById(R.id.editTextChannelLink)
-        editTextChannelLogo = findViewById(R.id.editTextChannelLogo)
-        editTextChannelCategory = findViewById(R.id.editTextChannelCategory)
-        buttonUpdate = findViewById(R.id.buttonUpdate)
-        buttonCancel = findViewById(R.id.buttonCancel)
-    }
-
     private fun setupCategoryDropdown() {
         val categories = CategoryManager.categories
         val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, categories)
-        editTextChannelCategory.setAdapter(adapter)
+        binding.editTextChannelCategory.setAdapter(adapter)
         
         // Set current category
-        editTextChannelCategory.setText(channel.category, false)
+        binding.editTextChannelCategory.setText(channel.category, false)
     }
 
     private fun validateInputs(): Boolean {
         var isValid = true
 
-        if (editTextChannelName.text.toString().trim().isEmpty()) {
-            editTextChannelName.error = context.getString(R.string.channel_name_required)
+        if (binding.editTextChannelName.text.toString().trim().isEmpty()) {
+            binding.editTextChannelName.error = context.getString(R.string.channel_name_required)
             isValid = false
         }
 
-        if (editTextChannelLink.text.toString().trim().isEmpty()) {
-            editTextChannelLink.error = context.getString(R.string.channel_link_required)
+        if (!ValidationUtils.validateUrl(binding.editTextChannelLink, context.getString(R.string.channel_link_required))) {
             isValid = false
         }
 
@@ -76,17 +57,17 @@ class EditChannelDialog(
     }
 
     private fun setupClickListeners() {
-        buttonCancel.setOnClickListener {
+        binding.buttonCancel.setOnClickListener {
             dismiss()
         }
 
-        buttonUpdate.setOnClickListener {
+        binding.buttonUpdate.setOnClickListener {
             if (!validateInputs()) return@setOnClickListener
 
-            val name = editTextChannelName.text.toString().trim()
-            val link = editTextChannelLink.text.toString().trim()
-            val logo = editTextChannelLogo.text.toString().trim()
-            val category = editTextChannelCategory.text.toString().trim()
+            val name = binding.editTextChannelName.text.toString().trim()
+            val link = binding.editTextChannelLink.text.toString().trim()
+            val logo = binding.editTextChannelLogo.text.toString().trim()
+            val category = binding.editTextChannelCategory.text.toString().trim()
 
             channel.apply {
                 this.name = name
@@ -101,10 +82,10 @@ class EditChannelDialog(
     }
 
     private fun populateData() {
-        editTextChannelName.setText(channel.name)
-        editTextChannelLink.setText(channel.link)
-        editTextChannelLogo.setText(channel.logo)
-        editTextChannelCategory.setText(channel.category)
+        binding.editTextChannelName.setText(channel.name)
+        binding.editTextChannelLink.setText(channel.link)
+        binding.editTextChannelLogo.setText(channel.logo)
+        binding.editTextChannelCategory.setText(channel.category)
     }
 
     fun interface ChannelUpdateListener {

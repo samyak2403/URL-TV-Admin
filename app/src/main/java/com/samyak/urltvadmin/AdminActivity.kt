@@ -10,51 +10,39 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.samyak.urltvadmin.databinding.ActivityAdminBinding
+import com.samyak.urltvadmin.repository.ChannelRepository
 
 class AdminActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var binding: ActivityAdminBinding
     private lateinit var adapter: ChannelAdapter
-    private lateinit var toolbar: Toolbar
-    private lateinit var fabAddChannel: FloatingActionButton
     private val channelList = mutableListOf<Channel>()
-    private lateinit var databaseReference: DatabaseReference
     private val allChannels = mutableListOf<Channel>()
+    private val channelRepository = ChannelRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_admin)
-
-        // Initialize views
-        recyclerView = findViewById(R.id.recyclerViewChannels)
-        toolbar = findViewById(R.id.toolbar)
-        fabAddChannel = findViewById(R.id.fabAddChannel)
+        binding = ActivityAdminBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Setup toolbar
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.title = "Manage Channels"
 
         // Setup RecyclerView
         adapter = ChannelAdapter(channelList, this)
-        recyclerView.apply {
+        binding.recyclerViewChannels.apply {
             layoutManager = LinearLayoutManager(this@AdminActivity)
-            this.adapter = this@AdminActivity.adapter
+            adapter = this@AdminActivity.adapter
         }
 
-        // Initialize Firebase
-        databaseReference = FirebaseDatabase.getInstance().getReference("channels")
-
         // Setup FAB click listener
-        fabAddChannel.setOnClickListener {
+        binding.fabAddChannel.setOnClickListener {
             startActivity(Intent(this, AddChannleActivity::class.java))
         }
 
@@ -113,7 +101,7 @@ class AdminActivity : AppCompatActivity() {
     }
 
     private fun fetchChannels() {
-        databaseReference.addValueEventListener(object : ValueEventListener {
+        channelRepository.getChannelReference().addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 allChannels.clear()
                 channelList.clear()
@@ -125,26 +113,27 @@ class AdminActivity : AppCompatActivity() {
                     }
                 }
                 adapter.notifyDataSetChanged()
+                
+                // Show empty state if needed
+                showEmptyState(channelList.isEmpty())
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                Toast.makeText(this@AdminActivity, "Error fetching data", Toast.LENGTH_SHORT).show()
+                showError("Error fetching data")
             }
         })
     }
 
     fun editChannel(channel: Channel) {
         val dialog = EditChannelDialog(this, channel) { updatedChannel ->
-            updatedChannel.id?.let {
-                databaseReference.child(it).setValue(updatedChannel)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(this, "Channel updated", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(this, "Failed to update channel", Toast.LENGTH_SHORT).show()
-                        }
+            channelRepository.updateChannel(updatedChannel)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Channel updated", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Failed to update channel", Toast.LENGTH_SHORT).show()
                     }
-            }
+                }
         }
         dialog.show()
     }
@@ -164,11 +153,11 @@ class AdminActivity : AppCompatActivity() {
     private fun showEmptyState(show: Boolean) {
         if (show) {
             // Show empty state view
-            recyclerView.visibility = View.GONE
-            // emptyStateView.visibility = View.VISIBLE
+            binding.recyclerViewChannels.visibility = View.GONE
+            // binding.emptyStateView.visibility = View.VISIBLE
         } else {
-            recyclerView.visibility = View.VISIBLE
-            // emptyStateView.visibility = View.GONE
+            binding.recyclerViewChannels.visibility = View.VISIBLE
+            // binding.emptyStateView.visibility = View.GONE
         }
     }
 }
