@@ -6,5 +6,9 @@
         <item name="android:statusBarColor">@color/Red</item>
     </style>
 
-    <style name="Theme.URLTVAdmin" parent="Base.Theme.URLTVAdmin" />
+    <style name="Theme.URLTVAdmin" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- ... other attributes ... -->
+<!--        <item name="android:statusBarColor">@color/colorPrimary</item>-->
+<!--        <item name="android:windowLightStatusBar">false</item>-->
+    </style>
 </resources>
