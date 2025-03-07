@@ -69,10 +69,10 @@ URL TV Admin is a powerful Android application designed for managing IPTV conten
 - Firebase project configuration
 
 ## Installation
-
-1. Clone the repository
-2. Add your `google-services.json` file to the app directory
-3. Build and run the project using Android Studio
+1. Download the latest APK from the [Releases](https://github.com/samyak2403/URL-TV-Admin/releases/latest) section
+2. Clone the repository
+3. Add your `google-services.json` file to the app directory
+4. Build and run the project using Android Studio
 
 ## Contributing
 
