@@ -10,7 +10,7 @@ URL TV Admin is a powerful Android application designed for managing IPTV conten
 - Real-time network status monitoring
 - Animated UI elements for better user experience
 
-![Dashboard](images/1.png)
+<img src="images/1.png" width="250px" alt="Dashboard">
 
 ### 2. Channel Management
 - Add, edit, and delete channels
@@ -18,7 +18,7 @@ URL TV Admin is a powerful Android application designed for managing IPTV conten
 - Support for channel logos
 - URL validation for stream links
 
-![Channel Management](images/2.png)
+<img src="images/2.png" width="250px" alt="Channel Management">
 
 ### 3. Category Management
 - Create and manage channel categories
@@ -26,7 +26,7 @@ URL TV Admin is a powerful Android application designed for managing IPTV conten
 - Delete unused categories
 - Hierarchical category organization
 
-![Category Management](images/3.png)
+<img src="images/3.png" width="250px" alt="Category Management">
 
 ### 4. Network Monitoring
 - Real-time network status checking
@@ -34,7 +34,7 @@ URL TV Admin is a powerful Android application designed for managing IPTV conten
 - Support for WiFi and cellular connections
 - Automatic status updates
 
-![Network Status](images/4.png)
+<img src="images/4.png" width="250px" alt="Network Status">
 
 ## Technical Features
 
