@@ -27,10 +27,16 @@ object CategoryManager {
     
     // Combined categories for display
     val categories: List<String>
-        get() = listOf(ALL_CATEGORIES) + dynamicCategories.ifEmpty { defaultCategories }
+        get() = listOf(ALL_CATEGORIES) + (dynamicCategories.ifEmpty { defaultCategories }).sorted()
 
-    fun getCategoryAdapter(context: Context) = 
-        ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, categories)
+    // Get categories without "All Categories" option
+    val editableCategories: List<String>
+        get() = (dynamicCategories.ifEmpty { defaultCategories }).sorted()
+
+    fun getCategoryAdapter(context: Context, includeAllCategories: Boolean = true): ArrayAdapter<String> {
+        val items = if (includeAllCategories) categories else editableCategories
+        return ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, items)
+    }
 
     fun isValidCategory(category: String): Boolean =
         categories.contains(category) || category == ALL_CATEGORIES

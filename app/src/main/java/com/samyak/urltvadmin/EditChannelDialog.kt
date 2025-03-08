@@ -33,12 +33,37 @@ class EditChannelDialog(
     }
 
     private fun setupCategoryDropdown() {
-        val categories = CategoryManager.categories
-        val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, categories)
-        binding.editTextChannelCategory.setAdapter(adapter)
+        // Get categories excluding "All Categories"
+        val categories = CategoryManager.categories.filter { it != CategoryManager.ALL_CATEGORIES }
         
-        // Set current category
-        binding.editTextChannelCategory.setText(channel.category, false)
+        // Create adapter with filtered categories
+        val adapter = ArrayAdapter(
+            context,
+            android.R.layout.simple_dropdown_item_1line,
+            categories
+        )
+        
+        binding.editTextChannelCategory.apply {
+            setAdapter(adapter)
+            threshold = 1 // Show dropdown after 1 character
+            
+            // Set current category and make it selected
+            setText(channel.category, false)
+            
+            // Handle item selection
+            setOnItemClickListener { _, _, position, _ ->
+                val selectedCategory = adapter.getItem(position).toString()
+                setText(selectedCategory, false)
+            }
+            
+            // Show dropdown when clicked
+            setOnClickListener {
+                if (text.isEmpty()) {
+                    setText("", false)
+                }
+                showDropDown()
+            }
+        }
     }
 
     private fun validateInputs(): Boolean {
@@ -85,7 +110,7 @@ class EditChannelDialog(
         binding.editTextChannelName.setText(channel.name)
         binding.editTextChannelLink.setText(channel.link)
         binding.editTextChannelLogo.setText(channel.logo)
-        binding.editTextChannelCategory.setText(channel.category)
+        // Don't set category here as it's handled in setupCategoryDropdown()
     }
 
     fun interface ChannelUpdateListener {

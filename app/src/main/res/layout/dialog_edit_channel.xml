@@ -81,25 +81,21 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/categoryInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:helperTextEnabled="true"
-        app:helperText="@string/optional">
+        android:hint="@string/category">
 
         <AutoCompleteTextView
             android:id="@+id/editTextChannelCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/category"
             android:inputType="none"
             android:focusable="false"
-            android:focusableInTouchMode="false"/>
+            android:focusableInTouchMode="false" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
