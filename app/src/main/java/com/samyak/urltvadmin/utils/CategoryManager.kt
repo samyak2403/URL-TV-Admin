@@ -2,7 +2,6 @@ package com.samyak.urltvadmin.utils
 
 import android.content.Context
 import android.widget.ArrayAdapter
-import com.samyak.urltvadmin.models.Category
 import com.samyak.urltvadmin.repository.CategoryRepository
 
 object CategoryManager {
@@ -41,18 +40,18 @@ object CategoryManager {
     fun isValidCategory(category: String): Boolean =
         categories.contains(category) || category == ALL_CATEGORIES
     
-    fun loadCategoriesFromFirebase(onComplete: () -> Unit) {
+    fun loadCategoriesFromFirebase(callback: (Any?) -> Unit) {
         val categoryRepository = CategoryRepository()
         categoryRepository.getAllCategories()
             .addOnSuccessListener { result ->
                 dynamicCategories.clear()
                 dynamicCategories.addAll(result.map { it.name })
-                onComplete()
+                callback(categories)
             }
             .addOnFailureListener {
                 // If loading fails, we'll use default categories
                 dynamicCategories.clear()
-                onComplete()
+                callback(categories)
             }
     }
 } 

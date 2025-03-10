@@ -15,7 +15,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/Red"
+            android:background="@color/colorPrimary"
             android:elevation="4dp"
             android:titleTextColor="@android:color/white"
 
@@ -144,9 +144,9 @@
         android:layout_margin="16dp"
         app:cornerRadius="8dp"
         android:minHeight="56dp"
-        android:backgroundTint="@color/Red"
+        android:backgroundTint="@color/colorPrimary"
         android:elevation="2dp"
-        app:rippleColor="@color/yellow"
+        app:rippleColor="@color/colorPrimary"
         android:stateListAnimator="@null"/>
 
     <Button

@@ -114,7 +114,7 @@
                 android:padding="8dp"
                 android:src="@drawable/ic_edit"
                 android:contentDescription="@string/edit_channel_button"
-                app:tint="@color/action_icon_color"/>
+                app:tint="@color/colorPrimary"/>
 
             <ImageButton
                 android:id="@+id/btnDelete"

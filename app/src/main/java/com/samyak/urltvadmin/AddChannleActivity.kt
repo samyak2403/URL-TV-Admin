@@ -39,7 +39,7 @@ class AddChannleActivity : AppCompatActivity() {
         binding.toolbar.setTitleTextColor(getColor(android.R.color.white))
         
         // Set status bar color to red
-        window.statusBarColor = getColor(R.color.Red)
+        window.statusBarColor = getColor(R.color.colorPrimary)
     }
 
     private fun setupCategoryDropdown() {

@@ -120,7 +120,7 @@
             android:layout_height="wrap_content"
             android:text="@string/update"
             android:textAllCaps="false"
-            app:backgroundTint="@color/Red"/>
+            app:backgroundTint="@color/colorPrimary"/>
 
     </LinearLayout>
 </LinearLayout>

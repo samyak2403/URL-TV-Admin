@@ -38,7 +38,7 @@ class AdminActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.Red)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimary)
 
 
         // Setup RecyclerView

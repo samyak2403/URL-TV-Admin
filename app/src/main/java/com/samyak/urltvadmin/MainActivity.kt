@@ -14,13 +14,11 @@ import android.view.animation.AnimationUtils
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
 import com.samyak.urltvadmin.databinding.ActivityMainBinding
 import com.samyak.urltvadmin.utils.CategoryManager
-import com.samyak.urltvadmin.utils.DrawableUtils
 import com.samyak.urltvadmin.utils.NetworkManager
 
 class MainActivity : AppCompatActivity() {
@@ -52,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         setupCardTouchEffects(binding.categoryCard)
         setupCardTouchEffects(binding.networkCard)
         setupCardTouchEffects(binding.aboutCard)
+        setupCardTouchEffects(binding.pushNotificationsCard)
         
         // Set click listeners for cards with improved handling
         binding.adminCard.setOnClickListener {
@@ -89,6 +88,11 @@ class MainActivity : AppCompatActivity() {
         binding.aboutCard.setOnClickListener {
             // Navigate to AboutActivity with animation
             animateAndNavigate(binding.aboutCard, AboutActivity::class.java)
+        }
+        
+        binding.pushNotificationsCard.setOnClickListener {
+            // Navigate to PushNotificationsActivity with animation
+            animateAndNavigate(binding.pushNotificationsCard, PushNotificationsActivity::class.java)
         }
         
         // Initialize CategoryManager with Firebase data
@@ -248,6 +252,7 @@ class MainActivity : AppCompatActivity() {
         binding.categoryCard.visibility = View.INVISIBLE
         binding.networkCard.visibility = View.INVISIBLE
         binding.aboutCard.visibility = View.INVISIBLE
+        binding.pushNotificationsCard.visibility = View.INVISIBLE
         
         // First row animation
         Handler(Looper.getMainLooper()).postDelayed({
@@ -274,6 +279,13 @@ class MainActivity : AppCompatActivity() {
                     binding.aboutCard.visibility = View.VISIBLE
                     val aboutCardAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_and_scale)
                     binding.aboutCard.startAnimation(aboutCardAnim)
+                    
+                    // Animate push notifications card with a slight delay after about card
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        binding.pushNotificationsCard.visibility = View.VISIBLE
+                        val pushNotificationsCardAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_and_scale)
+                        binding.pushNotificationsCard.startAnimation(pushNotificationsCardAnim)
+                    }, 150)
                 }, 150)
             }, 300)
         }, 600)
