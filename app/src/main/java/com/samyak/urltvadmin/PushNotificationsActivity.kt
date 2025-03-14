@@ -69,6 +69,15 @@ class PushNotificationsActivity : AppCompatActivity() {
 
         // Setup category spinner
         loadCategories()
+
+        // Add image URL validation
+        binding.imageUrlEditText.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                validateImageUrl(s.toString())
+            }
+        })
     }
     
     private fun loadCategories() {
@@ -97,6 +106,12 @@ class PushNotificationsActivity : AppCompatActivity() {
         }
     }
     
+    private fun validateImageUrl(url: String) {
+        if (url.isNotEmpty() && !android.util.Patterns.WEB_URL.matcher(url).matches()) {
+            binding.imageUrlEditText.error = "Please enter a valid URL"
+        }
+    }
+    
     private fun validateInputs(): Boolean {
         var isValid = true
         
@@ -109,6 +124,13 @@ class PushNotificationsActivity : AppCompatActivity() {
         // Check message
         if (binding.messageEditText.text.toString().trim().isEmpty()) {
             binding.messageEditText.error = "Message is required"
+            isValid = false
+        }
+
+        // Validate image URL if provided
+        val imageUrl = binding.imageUrlEditText.text.toString().trim()
+        if (imageUrl.isNotEmpty() && !android.util.Patterns.WEB_URL.matcher(imageUrl).matches()) {
+            binding.imageUrlEditText.error = "Please enter a valid URL"
             isValid = false
         }
         
@@ -131,6 +153,13 @@ class PushNotificationsActivity : AppCompatActivity() {
                 put("contents", JSONObject().put("en", message))
                 put("headings", JSONObject().put("en", title))
                 
+                // Add image if URL is provided
+                val imageUrl = binding.imageUrlEditText.text.toString().trim()
+                if (imageUrl.isNotEmpty()) {
+                    put("big_picture", imageUrl)
+                    put("large_icon", imageUrl)
+                }
+
                 if (targetCategory != "All Users") {
                     // Target specific category
                     put("filters", JSONArray().put(JSONObject().apply {
@@ -154,6 +183,7 @@ class PushNotificationsActivity : AppCompatActivity() {
                     binding.titleEditText.text?.clear()
                     binding.messageEditText.text?.clear()
                     binding.categorySpinner.setSelection(0)
+                    binding.imageUrlEditText.text?.clear()
                     
                     // Save to history
                     saveNotificationToHistory(title, message, targetCategory)
@@ -207,11 +237,14 @@ class PushNotificationsActivity : AppCompatActivity() {
 
     private fun saveNotificationToHistory(title: String, message: String, targetCategory: String) {
         val timestamp = System.currentTimeMillis()
+        val imageUrl = binding.imageUrlEditText.text.toString().trim()
+        
         val notification = hashMapOf(
             "title" to title,
             "message" to message,
             "targetCategory" to targetCategory,
-            "timestamp" to timestamp
+            "timestamp" to timestamp,
+            "imageUrl" to imageUrl
         )
         
         db.collection("notification_history")
@@ -251,11 +284,12 @@ class PushNotificationsActivity : AppCompatActivity() {
                         val message = doc.getString("message") ?: ""
                         val targetCategory = doc.getString("targetCategory") ?: "All Users"
                         val timestamp = doc.getLong("timestamp") ?: 0L
+                        val imageUrl = doc.getString("imageUrl") ?: ""
                         
                         val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
                         val date = dateFormat.format(Date(timestamp))
                         
-                        NotificationHistoryItem(title, message, targetCategory, date)
+                        NotificationHistoryItem(title, message, targetCategory, date, imageUrl)
                     }
                     
                     val adapter = NotificationHistoryAdapter(this, historyItems)
@@ -283,7 +317,8 @@ class PushNotificationsActivity : AppCompatActivity() {
         val title: String,
         val message: String,
         val targetCategory: String,
-        val date: String
+        val date: String,
+        val imageUrl: String = ""
     )
     
     inner class NotificationHistoryAdapter(
