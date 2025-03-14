@@ -2,6 +2,16 @@
 
 URL TV Admin is a powerful Android application designed for managing IPTV content. It provides an intuitive interface for administrators to manage channels, categories, and monitor network connectivity.
 
+## Enjoying URLTV Admin App? Consider Supporting!
+Consider donating to support the development! It requires a lot of time and effort to develop the
+copylefted libre software app, gratis 
+
+<p align="center">
+  <a href="https://buymeacoffee.com/mr_samyakkamble">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60px">
+  </a>
+</p>
+
 ## Features
 
 ### 1. Dashboard
