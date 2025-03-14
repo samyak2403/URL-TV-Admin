@@ -66,6 +66,7 @@ dependencies {
     
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     
     // OneSignal
     implementation("com.onesignal:OneSignal:[5.0.0, 5.1.99]")

@@ -34,6 +34,27 @@
             android:ellipsize="end"
             android:maxLines="2" />
 
+        <FrameLayout
+            android:id="@+id/imageContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/notificationImage"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/rounded_image_background"/>
+
+            <ProgressBar
+                android:id="@+id/imageProgress"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"/>
+        </FrameLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -56,13 +77,5 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/notificationImage"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginEnd="8dp"
-            android:visibility="gone"
-            android:scaleType="centerCrop"/>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView> 

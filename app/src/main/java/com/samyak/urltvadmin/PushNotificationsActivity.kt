@@ -1,40 +1,37 @@
 package com.samyak.urltvadmin
 
+
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.onesignal.OneSignal
-import com.samyak.urltvadmin.databinding.ActivityPushNotificationsBinding
-import com.samyak.urltvadmin.utils.CategoryManager
-import org.json.JSONException
-import org.json.JSONObject
-import org.json.JSONArray
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.samyak.urltvadmin.adapters.NotificationHistoryAdapter
+import com.samyak.urltvadmin.databinding.ActivityPushNotificationsBinding
+import com.samyak.urltvadmin.models.NotificationHistoryItem
+import com.samyak.urltvadmin.utils.CategoryManager
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class PushNotificationsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPushNotificationsBinding
     private val db = FirebaseFirestore.getInstance()
+    private lateinit var notificationAdapter: NotificationHistoryAdapter
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +51,10 @@ class PushNotificationsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Push Notifications"
         
+        // Initialize adapter with empty list
+        notificationAdapter = NotificationHistoryAdapter(this, emptyList())
+        binding.historyList.adapter = notificationAdapter
+
         // Load notification history
         loadNotificationHistory()
         
@@ -81,28 +82,48 @@ class PushNotificationsActivity : AppCompatActivity() {
     }
     
     private fun loadCategories() {
-        // Show loading indicator
         binding.categoryProgressBar.visibility = View.VISIBLE
         
-        // Load categories from CategoryManager
         CategoryManager.loadCategoriesFromFirebase { categoriesList ->
-            // Add "All Users" option at the beginning
-            val categoryOptions = mutableListOf("All Users")
-            
-            // Cast the categoriesList to List<String> and add all items
-            @Suppress("UNCHECKED_CAST")
-            val categories = categoriesList as? List<String> ?: CategoryManager.categories
-            categoryOptions.addAll(categories.filter { it != CategoryManager.ALL_CATEGORIES })
-            
-            // Setup adapter for spinner
-            val adapter = android.widget.ArrayAdapter(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                categoryOptions
-            )
-            
-            binding.categorySpinner.adapter = adapter
-            binding.categoryProgressBar.visibility = View.GONE
+            runOnUiThread {
+                try {
+                    // Create immutable list with "All Users" first
+                    val categoryOptions = buildList {
+                        add("All Users")
+                        @Suppress("UNCHECKED_CAST")
+                        (categoriesList as? List<String>)?.let { categories ->
+                            addAll(categories.filter { it.isNotEmpty() && it != "All Users" }.sorted())
+                        }
+                    }
+                    
+                    // Custom adapter with better layout handling
+                    val adapter = object : android.widget.ArrayAdapter<String>(
+                        this@PushNotificationsActivity,
+                        R.layout.item_spinner,
+                        categoryOptions
+                    ) {
+                        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            return (super.getView(position, convertView, parent) as TextView).apply {
+                                setTextColor(ContextCompat.getColor(context, R.color.text_primary))
+                                textSize = 16f
+                            }
+                        }
+                        
+                        override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                                setPadding(24, 16, 24, 16)
+                            }
+                        }
+                    }
+                    
+                    binding.categorySpinner.adapter = adapter
+                } catch (e: Exception) {
+                    Toast.makeText(this@PushNotificationsActivity, 
+                        "Error loading categories: ${e.message}", 
+                        Toast.LENGTH_SHORT).show()
+                }
+                binding.categoryProgressBar.visibility = View.GONE
+            }
         }
     }
     
@@ -194,9 +215,6 @@ class PushNotificationsActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                     
-                    // Refresh history
-                    loadNotificationHistory()
-                    
                     // Reset UI state
                     binding.sendButton.isEnabled = true
                     binding.progressBar.visibility = View.GONE
@@ -250,10 +268,10 @@ class PushNotificationsActivity : AppCompatActivity() {
         db.collection("notification_history")
             .add(notification)
             .addOnSuccessListener {
-                // Successfully saved to history
+                // Refresh the history list after successful save
+                loadNotificationHistory()
             }
             .addOnFailureListener { e ->
-                // Failed to save to history
                 Toast.makeText(
                     this,
                     "Failed to save notification history: ${e.message}",
@@ -280,20 +298,19 @@ class PushNotificationsActivity : AppCompatActivity() {
                     binding.historyList.visibility = View.VISIBLE
                     
                     val historyItems = documents.map { doc ->
-                        val title = doc.getString("title") ?: ""
-                        val message = doc.getString("message") ?: ""
-                        val targetCategory = doc.getString("targetCategory") ?: "All Users"
-                        val timestamp = doc.getLong("timestamp") ?: 0L
-                        val imageUrl = doc.getString("imageUrl") ?: ""
-                        
-                        val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
-                        val date = dateFormat.format(Date(timestamp))
-                        
-                        NotificationHistoryItem(title, message, targetCategory, date, imageUrl)
+                        NotificationHistoryItem(
+                            title = doc.getString("title") ?: "",
+                            message = doc.getString("message") ?: "",
+                            targetCategory = doc.getString("targetCategory") ?: "All Users",
+                            date = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+                                .format(Date(doc.getLong("timestamp") ?: 0L)),
+                            imageUrl = doc.getString("imageUrl") ?: ""
+                        )
                     }
                     
-                    val adapter = NotificationHistoryAdapter(this, historyItems)
-                    binding.historyList.adapter = adapter
+                    // Update adapter with new items
+                    notificationAdapter = NotificationHistoryAdapter(this, historyItems)
+                    binding.historyList.adapter = notificationAdapter
                 }
                 
                 binding.historyProgressBar.visibility = View.GONE
@@ -311,36 +328,5 @@ class PushNotificationsActivity : AppCompatActivity() {
             return true
         }
         return super.onOptionsItemSelected(item)
-    }
-    
-    data class NotificationHistoryItem(
-        val title: String,
-        val message: String,
-        val targetCategory: String,
-        val date: String,
-        val imageUrl: String = ""
-    )
-    
-    inner class NotificationHistoryAdapter(
-        private val context: android.content.Context,
-        private val items: List<NotificationHistoryItem>
-    ) : android.widget.ArrayAdapter<NotificationHistoryItem>(
-        context,
-        android.R.layout.simple_list_item_2,
-        items
-    ) {
-        override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
-            val view = convertView ?: android.view.LayoutInflater.from(context)
-                .inflate(R.layout.item_notification_history, parent, false)
-            
-            val item = items[position]
-            
-            view.findViewById<android.widget.TextView>(R.id.titleText).text = item.title
-            view.findViewById<android.widget.TextView>(R.id.messageText).text = item.message
-            view.findViewById<android.widget.TextView>(R.id.targetText).text = "To: ${item.targetCategory}"
-            view.findViewById<android.widget.TextView>(R.id.dateText).text = item.date
-            
-            return view
-        }
     }
 } 
