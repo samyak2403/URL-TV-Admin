@@ -105,8 +105,8 @@
                             android:layout_height="64dp"
                             android:contentDescription="Admin Icon"
                             android:padding="8dp"
-                            android:src="@android:drawable/ic_menu_manage"
-                            app:tint="@color/icon_tint" />
+                            android:src="@drawable/admin"
+                           />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -157,8 +157,8 @@
                             android:layout_height="64dp"
                             android:contentDescription="Category Icon"
                             android:padding="8dp"
-                            android:src="@android:drawable/ic_menu_sort_by_size"
-                            app:tint="@color/category_icon_tint" />
+                            android:src="@drawable/list"
+                            />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -283,7 +283,7 @@
                             android:layout_height="64dp"
                             android:contentDescription="About Icon"
                             android:padding="8dp"
-                            android:src="@drawable/about_icon" />
+                            android:src="@drawable/information" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -307,7 +307,7 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- Third row with Push Notifications card -->
+            <!-- Third row with Push Notifications card and Ads Control card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -343,8 +343,8 @@
                             android:layout_height="64dp"
                             android:contentDescription="Push Notifications Icon"
                             android:padding="8dp"
-                            android:src="@android:drawable/ic_popup_reminder"
-                            app:tint="@color/icon_tint" />
+                            android:src="@drawable/notificationbell"
+                            />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -362,6 +362,59 @@
                             android:layout_marginTop="2dp"
                             android:alpha="0.8"
                             android:text="Send push alerts"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- New Ads Control card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/adsControlCard"
+                    android:layout_width="150dp"
+                    android:layout_height="170dp"
+                    android:layout_margin="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:stateListAnimator="@android:animator/fade_in"
+                    app:cardBackgroundColor="@color/card_background"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:rippleColor="@color/ripple_color"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/card_gradient_background"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <ImageView
+                            android:id="@+id/adsIcon"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:contentDescription="Ads Control Icon"
+                            android:padding="8dp"
+                            android:src="@drawable/googleadmob"
+                             />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="Ads Control"
+                            android:textColor="@color/text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:alpha="0.8"
+                            android:text="Manage advertisements"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>

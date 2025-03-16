@@ -256,13 +256,15 @@ class PushNotificationsActivity : AppCompatActivity() {
     private fun saveNotificationToHistory(title: String, message: String, targetCategory: String) {
         val timestamp = System.currentTimeMillis()
         val imageUrl = binding.imageUrlEditText.text.toString().trim()
+        val link = binding.editTextChannelLink.text.toString().trim()
         
         val notification = hashMapOf(
             "title" to title,
             "message" to message,
             "targetCategory" to targetCategory,
             "timestamp" to timestamp,
-            "imageUrl" to imageUrl
+            "imageUrl" to imageUrl,
+            "link" to link
         )
         
         db.collection("notification_history")
@@ -304,7 +306,9 @@ class PushNotificationsActivity : AppCompatActivity() {
                             targetCategory = doc.getString("targetCategory") ?: "All Users",
                             date = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
                                 .format(Date(doc.getLong("timestamp") ?: 0L)),
-                            imageUrl = doc.getString("imageUrl") ?: ""
+                            imageUrl = doc.getString("imageUrl") ?: "",
+                            link = doc.getString("link") ?: ""
+
                         )
                     }
                     

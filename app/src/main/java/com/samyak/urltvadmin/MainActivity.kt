@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         setupCardTouchEffects(binding.networkCard)
         setupCardTouchEffects(binding.aboutCard)
         setupCardTouchEffects(binding.pushNotificationsCard)
+        setupCardTouchEffects(binding.adsControlCard)
         
         // Set click listeners for cards with improved handling
         binding.adminCard.setOnClickListener {
@@ -93,6 +94,12 @@ class MainActivity : AppCompatActivity() {
         binding.pushNotificationsCard.setOnClickListener {
             // Navigate to PushNotificationsActivity with animation
             animateAndNavigate(binding.pushNotificationsCard, PushNotificationsActivity::class.java)
+        }
+        
+        // Add click listener for the new Ads Control card
+        binding.adsControlCard.setOnClickListener {
+            // Navigate to AdsControlActivity with animation
+            animateAndNavigate(binding.adsControlCard, AdsControlActivity::class.java)
         }
         
         // Initialize CategoryManager with Firebase data
@@ -253,6 +260,7 @@ class MainActivity : AppCompatActivity() {
         binding.networkCard.visibility = View.INVISIBLE
         binding.aboutCard.visibility = View.INVISIBLE
         binding.pushNotificationsCard.visibility = View.INVISIBLE
+        binding.adsControlCard.visibility = View.INVISIBLE
         
         // First row animation
         Handler(Looper.getMainLooper()).postDelayed({
@@ -285,6 +293,13 @@ class MainActivity : AppCompatActivity() {
                         binding.pushNotificationsCard.visibility = View.VISIBLE
                         val pushNotificationsCardAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_and_scale)
                         binding.pushNotificationsCard.startAnimation(pushNotificationsCardAnim)
+                        
+                        // Animate ads control card with a slight delay after push notifications card
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            binding.adsControlCard.visibility = View.VISIBLE
+                            val adsControlCardAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_and_scale)
+                            binding.adsControlCard.startAnimation(adsControlCardAnim)
+                        }, 150)
                     }, 150)
                 }, 150)
             }, 300)

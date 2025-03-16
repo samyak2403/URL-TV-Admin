@@ -51,6 +51,10 @@
             android:name=".PushNotificationsActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".AdsControlActivity"
+            android:exported="false"
+            android:theme="@style/Theme.URLTVAdmin" />
     </application>
 
 </manifest>
