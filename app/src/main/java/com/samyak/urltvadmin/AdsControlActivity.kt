@@ -150,7 +150,11 @@ class AdsControlActivity : AppCompatActivity() {
             hasChanges = true
         }
         
-        // Setup text change listeners
+        // Setup text change listeners for all EditText fields
+        setupTextChangeListeners()
+    }
+    
+    private fun setupTextChangeListeners() {
         val textWatchers = listOf(
             binding.bannerAdIdEditText,
             binding.interstitialAdIdEditText,
@@ -286,7 +290,12 @@ class AdsControlActivity : AppCompatActivity() {
                 
                 try {
                     // Convert snapshot to AdmobAds object
-                    admobAds = snapshot.getValue(AdmobAds::class.java) ?: AdmobAds()
+                    val loadedAdmobAds = snapshot.getValue(AdmobAds::class.java)
+                    if (loadedAdmobAds != null) {
+                        admobAds = loadedAdmobAds
+                    } else {
+                        Log.w("AdsControlActivity", "Failed to parse AdmobAds data, using defaults")
+                    }
                     
                     // Update UI with loaded values
                     updateUIFromConfig()
@@ -296,6 +305,7 @@ class AdsControlActivity : AppCompatActivity() {
                     
                     Toast.makeText(this@AdsControlActivity, "Ad configuration loaded successfully", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
+                    Log.e("AdsControlActivity", "Error loading ad configuration", e)
                     Toast.makeText(this@AdsControlActivity, "Error loading ad configuration: ${e.message}", Toast.LENGTH_SHORT).show()
                     
                     // Setup UI even if there's an error
@@ -308,6 +318,7 @@ class AdsControlActivity : AppCompatActivity() {
                 binding.progressBar.visibility = View.GONE
                 binding.contentLayout.alpha = 1.0f
                 
+                Log.e("AdsControlActivity", "Database error: ${error.message}")
                 Toast.makeText(this@AdsControlActivity, "Failed to load ad configuration: ${error.message}", Toast.LENGTH_SHORT).show()
                 
                 // Setup UI even if there's an error
@@ -393,6 +404,7 @@ class AdsControlActivity : AppCompatActivity() {
                     binding.progressBar.visibility = View.GONE
                     binding.contentLayout.alpha = 1.0f
                     
+                    Log.e("AdsControlActivity", "Error saving ad configuration", e)
                     Toast.makeText(this, "Error saving ad configuration: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             
@@ -401,6 +413,7 @@ class AdsControlActivity : AppCompatActivity() {
             binding.progressBar.visibility = View.GONE
             binding.contentLayout.alpha = 1.0f
             
+            Log.e("AdsControlActivity", "Error creating ad configuration", e)
             Toast.makeText(this, "Error saving ad configuration: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
@@ -408,10 +421,10 @@ class AdsControlActivity : AppCompatActivity() {
     private fun createAdmobAdsFromUI(): AdmobAds {
         return AdmobAds(
             // Ad IDs - only save if the switch is enabled
-            bannerAd = if (binding.bannerAdsSwitch.isChecked) binding.bannerAdIdEditText.text.toString() else null,
-            interstitialAd = if (binding.interstitialAdsSwitch.isChecked) binding.interstitialAdIdEditText.text.toString() else null,
-            appOpenAd = if (binding.appOpenAdsSwitch.isChecked) binding.appOpenAdIdEditText.text.toString() else null,
-            nativeAd = if (binding.nativeAdsSwitch.isChecked) binding.nativeAdIdEditText.text.toString() else null,
+            bannerAd = if (binding.bannerAdsSwitch.isChecked) binding.bannerAdIdEditText.text.toString().trim() else null,
+            interstitialAd = if (binding.interstitialAdsSwitch.isChecked) binding.interstitialAdIdEditText.text.toString().trim() else null,
+            appOpenAd = if (binding.appOpenAdsSwitch.isChecked) binding.appOpenAdIdEditText.text.toString().trim() else null,
+            nativeAd = if (binding.nativeAdsSwitch.isChecked) binding.nativeAdIdEditText.text.toString().trim() else null,
             
             // Ad enabled flags
             bannerAdEnabled = binding.bannerAdsSwitch.isChecked,
@@ -423,9 +436,9 @@ class AdsControlActivity : AppCompatActivity() {
             // Banner settings
             bannerAdAnimation = binding.bannerAnimationSwitch.isChecked,
             bannerAdShowWaterMark = binding.watermarkSwitch.isChecked,
-            bannerAdWaterMarkText = binding.watermarkTextEditText.text.toString(),
-            bannerAdWaterMarkBG = binding.watermarkBgColorEditText.text.toString(),
-            bannerAdWaterMarkFG = binding.watermarkFgColorEditText.text.toString(),
+            bannerAdWaterMarkText = binding.watermarkTextEditText.text.toString().trim(),
+            bannerAdWaterMarkBG = binding.watermarkBgColorEditText.text.toString().trim(),
+            bannerAdWaterMarkFG = binding.watermarkFgColorEditText.text.toString().trim(),
             bannerAdAnimationDuration = binding.animationDurationEditText.text.toString().toLongOrNull() ?: 500L,
             bannerAdHideWaterMarkOnError = binding.hideWatermarkOnErrorSwitch.isChecked,
             bannerAdRetriesThreshold = binding.bannerRetriesThresholdEditText.text.toString().toIntOrNull() ?: 10,
@@ -439,7 +452,7 @@ class AdsControlActivity : AppCompatActivity() {
             loadInterstitialAdAgainAfterShowing = binding.loadInterstitialAgainSwitch.isChecked,
             
             // Dialog settings
-            dialogMessage = binding.dialogMessageEditText.text.toString(),
+            dialogMessage = binding.dialogMessageEditText.text.toString().trim(),
             dialogCancellable = binding.dialogCancellableSwitch.isChecked,
             
             // Native ad settings
